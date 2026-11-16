@@ -20,6 +20,13 @@ interface FilaFlota {
 export default function ListaNaves({ version }: Props) {
   const [filas, setFilas] = useState<FilaFlota[] | null>(null);
   const [error, setError] = useState(false);
+  // Cambia tras registrar una revisión, para recargar contador y aptitud
+  const [recarga, setRecarga] = useState(0);
+
+  async function registrarRevision(naveId: string) {
+    await navesService.registrarRevision(naveId);
+    setRecarga((r) => r + 1);
+  }
 
   useEffect(() => {
     let cancelado = false;
@@ -46,7 +53,7 @@ export default function ListaNaves({ version }: Props) {
     return () => {
       cancelado = true;
     };
-  }, [version]);
+  }, [version, recarga]);
 
   if (error) {
     return (
@@ -61,7 +68,13 @@ export default function ListaNaves({ version }: Props) {
   return (
     <ul className="flota">
       {filas.map(({ nave, misiones, aptitud }) => (
-        <TarjetaNave key={nave.id} nave={nave} misiones={misiones} aptitud={aptitud} />
+        <TarjetaNave
+          key={nave.id}
+          nave={nave}
+          misiones={misiones}
+          aptitud={aptitud}
+          onRegistrarRevision={registrarRevision}
+        />
       ))}
     </ul>
   );
