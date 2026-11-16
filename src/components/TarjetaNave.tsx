@@ -4,6 +4,7 @@ import type { Nave } from '../types/nave';
 import BarraCombustible from './BarraCombustible';
 import ContadorMisiones from './ContadorMisiones';
 import InsigniaEstado from './InsigniaEstado';
+import MisionesNave from './MisionesNave';
 
 interface Props {
   nave: Nave;
@@ -32,6 +33,7 @@ export default function TarjetaNave({ nave, misiones, aptitud }: Props) {
           ))}
         </ul>
       )}
+      <MisionesNave naveId={nave.id} />
     </li>
   );
 }
