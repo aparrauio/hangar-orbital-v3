@@ -1,0 +1,65 @@
+/* Estilos base de la «Consola de Hangar»: DESIGN.md §3, §4.2 y §4.4. */
+
+/* Tema oscuro único: también afecta a los controles nativos, como el selector de fecha */
+:root {
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--color-fondo);
+  color: var(--color-texto);
+  font-family: var(--fuente-texto);
+  font-size: var(--texto-base);
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-family: var(--fuente-titulo);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+h1 {
+  font-size: var(--texto-xl);
+}
+
+h2,
+h3 {
+  font-size: var(--texto-lg);
+}
+
+p {
+  margin: 0;
+}
+
+/* Los controles no heredan la fuente por defecto */
+button,
+input,
+select {
+  font: inherit;
+}
+
+/* Cifras alineadas para compararse en columna */
+.cifra {
+  font-family: var(--fuente-cifras);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+  }
+}

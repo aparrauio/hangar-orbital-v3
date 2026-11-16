@@ -1,0 +1,56 @@
+/* Encabezado, tablero, panel y grilla de la flota: DESIGN.md §5 y §6.1. */
+
+.contenedor {
+  display: grid;
+  gap: var(--espacio-6);
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--espacio-6) var(--espacio-4);
+}
+
+/* Encabezado */
+.encabezado {
+  display: grid;
+  gap: var(--espacio-1);
+}
+
+.encabezado p {
+  color: var(--color-texto-suave);
+}
+
+/* Tablero: una columna por defecto, con el mismo orden que en pantalla ancha */
+.tablero,
+.tablero-paneles {
+  display: grid;
+  gap: var(--espacio-6);
+  align-items: start;
+  min-width: 0;
+}
+
+/* Panel */
+.panel {
+  display: grid;
+  gap: var(--espacio-4);
+  min-width: 0;
+  padding: var(--espacio-6);
+  background: var(--color-superficie);
+  border: var(--borde);
+  border-radius: var(--radio-md);
+}
+
+/* La flota no va en un Panel: sus tarjetas ya tienen superficie (spec 02, decisión 2) */
+.seccion-flota {
+  display: grid;
+  gap: var(--espacio-4);
+  min-width: 0;
+}
+
+.flota {
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+@media (min-width: 900px) {
+  .tablero {
+    grid-template-columns: 360px minmax(0, 1fr);
+  }
+}

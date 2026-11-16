@@ -1,0 +1,68 @@
+/* Campo de formulario y Botón: DESIGN.md §6.2 y §6.3. */
+
+.formulario {
+  display: grid;
+  gap: var(--espacio-4);
+}
+
+/* Campo de formulario */
+.campo {
+  display: grid;
+  gap: var(--espacio-1);
+  min-width: 0;
+}
+
+.campo label {
+  font-size: var(--texto-sm);
+  font-weight: 600;
+}
+
+.campo-control {
+  width: 100%;
+  min-width: 0;
+  min-height: 40px;
+  padding: 0 var(--espacio-3);
+  color: var(--color-texto);
+  background: var(--color-superficie-alta);
+  border: 1px solid var(--color-borde-control);
+  border-radius: var(--radio-sm);
+  transition: border-color var(--duracion-corta) ease-out;
+}
+
+.campo-control[aria-invalid='true'] {
+  border-color: var(--color-no-apta);
+}
+
+.campo-error {
+  color: var(--color-no-apta);
+  font-size: var(--texto-sm);
+}
+
+/* Botón */
+.boton {
+  justify-self: start;
+  min-height: 40px;
+  padding: 0 var(--espacio-4);
+  border: 1px solid transparent;
+  border-radius: var(--radio-sm);
+  cursor: pointer;
+}
+
+.boton--primario {
+  color: var(--color-sobre-acento);
+  font-weight: 600;
+  background: var(--color-acento);
+}
+
+.boton:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Foco: va al final para que también se vea en un campo con error */
+.campo-control:focus-visible,
+.boton:focus-visible {
+  border-color: var(--color-acento);
+  outline: 2px solid var(--color-acento);
+  outline-offset: 2px;
+}
