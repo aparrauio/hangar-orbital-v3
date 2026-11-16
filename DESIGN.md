@@ -143,11 +143,12 @@ Contenedor de cada sección. Fondo `--color-superficie`, `--borde`, `--radio-md`
 | Variante | Aspecto | Uso |
 | --- | --- | --- |
 | Primario | Fondo `--color-acento`, texto `--color-sobre-acento`, peso 600 | Acción principal del panel: «Registrar nave», «Asignar misión» |
-| Secundario | Fondo transparente, borde `--color-borde-control`, texto `--color-texto` | Acciones de apoyo |
+| Secundario | Fondo transparente, borde `--color-borde-control`, texto `--color-texto` | Acciones de apoyo: «Ver misiones» / «Ocultar misiones» en la Tarjeta de nave (spec 04) |
 
 - Alto mínimo 40 px, relleno horizontal `--espacio-4`, `--radio-sm`.
 - **Enviando:** el botón se deshabilita y baja su opacidad a 0.6, sin cambiar de ancho.
 - El foco sigue la misma regla que en los campos.
+- Clases: `boton boton--primario` y `boton boton--secundario`. La base y el primario viven en `formularios.css`; el secundario, de momento, en `misiones.css` (spec 04, pendiente de pasarlo a `formularios.css`).
 
 ### 6.4 Insignia de estado
 
@@ -186,6 +187,14 @@ Orden fijo de arriba abajo:
 4. **Contador de misiones.**
 5. **Estado:** «Operativa» en texto suave, o la insignia «En reparación».
 6. **Motivos:** solo si la nave no es apta. Lista en `--texto-sm` con los textos de `MENSAJES_MOTIVO`.
+7. **Misiones** (spec 04): siempre presente, al final de la tarjeta.
+   - Un Botón secundario «Ver misiones», que pasa a «Ocultar misiones» con la lista abierta. Lleva `aria-expanded` y `aria-controls` apuntando a la lista.
+   - Las misiones se cargan al abrir, no antes. Mientras cargan: «Cargando misiones…» en `--texto-sm` y `--color-texto-suave`.
+   - Sin misiones: «Esta nave no tiene misiones.» con el mismo estilo que el texto de carga.
+   - Si falla la carga: Aviso de error (§6.8) con «No se pudieron cargar las misiones.». El resto de la tarjeta sigue igual.
+   - Lista `ul`, un `li` por misión, separados con `gap` `--espacio-2` y sin viñetas. Cada misión: el destino en `--texto-sm` y peso 600; debajo, la fecha de despegue en `--fuente-cifras` («Hoy», «Mañana», «10/12/2026» o «Despegó el 15/11/2026») y la duración («5 días»), ambas en `--texto-sm` y `--color-texto-suave`.
+   - Cada misión lleva fondo `--color-superficie-alta`, `--radio-sm` y relleno `--espacio-2` `--espacio-3`.
+   - Estilos en `src/styles/misiones.css`.
 
 Fondo `--color-superficie`, `--borde`, `--radio-md`, relleno `--espacio-4`, separación interna `--espacio-3`. La flota es una lista (`ul` con un `li` por tarjeta).
 
@@ -196,7 +205,7 @@ Fondo `--color-superficie`, `--borde`, `--radio-md`, relleno `--espacio-4`, sepa
 | Éxito | Fondo `--color-apta-fondo`, borde `1px solid var(--color-apta)`, texto `--color-texto` | `role="status"` |
 | Error | Fondo `--color-no-apta-fondo`, borde `1px solid var(--color-no-apta)`, texto `--color-texto` | `role="alert"` |
 
-Aparecen debajo del botón del formulario que los produjo.
+Aparecen debajo del botón del formulario que los produjo. En la Tarjeta de nave, el aviso de error de las misiones aparece debajo del botón «Ver misiones».
 
 ### 6.9 Estados de la flota
 

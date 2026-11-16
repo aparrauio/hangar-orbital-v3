@@ -76,4 +76,15 @@ async function crear(borrador: BorradorMision, hoy: string): Promise<ResultadoCr
   return { estado: 'creada', mision: aMision(data) };
 }
 
-export const misionesService = { contarDesdeRevision, crear };
+// Todas las misiones de la nave, sin ordenar: el orden lo decide ordenarMisiones (HU-1.4)
+async function listarPorNave(naveId: string): Promise<Mision[]> {
+  const { data, error } = await supabase
+    .from('misiones')
+    .select(COLUMNAS_MISION)
+    .eq('nave_id', naveId)
+    .overrideTypes<FilaMision[], { merge: false }>();
+  if (error) throw new Error(error.message);
+  return data.map(aMision);
+}
+
+export const misionesService = { contarDesdeRevision, crear, listarPorNave };

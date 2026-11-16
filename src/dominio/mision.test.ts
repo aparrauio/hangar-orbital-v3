@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { validarMision } from './mision';
-import type { BorradorMision } from '../types/mision';
+import {
+  describirDuracion,
+  describirFechaDespegue,
+  ordenarMisiones,
+  validarMision,
+} from './mision';
+import type { BorradorMision, Mision } from '../types/mision';
 
 const HOY = '2026-10-28';
 
@@ -69,5 +74,100 @@ describe('validarMision', () => {
       'fechaDespegue',
       'duracionDias',
     ]);
+  });
+});
+
+function mision(id: string, fechaDespegue: string, createdAt: string): Mision {
+  return {
+    id,
+    naveId: '6f1c2a3e-0000-4000-8000-000000000001',
+    destino: `Destino ${id}`,
+    fechaDespegue,
+    duracionDias: 3,
+    createdAt,
+  };
+}
+
+describe('ordenarMisiones', () => {
+  it('ordena por fecha de despegue, de la más próxima a la más lejana (HU-1.4-CA1)', () => {
+    const lejana = mision('a', '2026-12-20', '2026-11-01T10:00:00Z');
+    const proxima = mision('b', '2026-12-10', '2026-11-02T10:00:00Z');
+    expect(ordenarMisiones([lejana, proxima]).map((m) => m.id)).toEqual(['b', 'a']);
+  });
+
+  it('con la misma fecha de despegue, va primero la que se asignó antes (HU-1.4-CA2)', () => {
+    const despues = mision('a', '2026-12-10', '2026-11-05T10:00:00Z');
+    const antes = mision('b', '2026-12-10', '2026-11-01T10:00:00Z');
+    expect(ordenarMisiones([despues, antes]).map((m) => m.id)).toEqual(['b', 'a']);
+  });
+
+  it('desempata por el instante de asignación aunque el día sea el mismo', () => {
+    const tarde = mision('a', '2026-12-10', '2026-11-01T18:30:00Z');
+    const temprano = mision('b', '2026-12-10', '2026-11-01T09:15:00Z');
+    expect(ordenarMisiones([tarde, temprano]).map((m) => m.id)).toEqual(['b', 'a']);
+  });
+
+  it('no modifica el arreglo recibido', () => {
+    const original = [
+      mision('a', '2026-12-20', '2026-11-01T10:00:00Z'),
+      mision('b', '2026-12-10', '2026-11-02T10:00:00Z'),
+    ];
+    const copia = [...original];
+    const ordenadas = ordenarMisiones(original);
+    expect(original).toEqual(copia);
+    expect(ordenadas).not.toBe(original);
+  });
+
+  it('devuelve un arreglo vacío si no hay misiones', () => {
+    expect(ordenarMisiones([])).toEqual([]);
+  });
+});
+
+describe('describirFechaDespegue', () => {
+  it('devuelve «Hoy» si la fecha es hoy (HU-1.4-CA4)', () => {
+    expect(describirFechaDespegue('2026-11-16', '2026-11-16')).toBe('Hoy');
+  });
+
+  it('devuelve «Mañana» si la fecha es el día siguiente (HU-1.4-CA4)', () => {
+    expect(describirFechaDespegue('2026-11-17', '2026-11-16')).toBe('Mañana');
+  });
+
+  it.each([
+    ['2026-02-01', '2026-01-31'],
+    ['2026-03-01', '2026-02-28'],
+    ['2028-02-29', '2028-02-28'],
+    ['2027-01-01', '2026-12-31'],
+  ])('devuelve «Mañana» para %s con hoy %s (cambio de mes y de año)', (fecha, hoy) => {
+    expect(describirFechaDespegue(fecha, hoy)).toBe('Mañana');
+  });
+
+  it('devuelve «Despegó el DD/MM/AAAA» si la fecha es de ayer (HU-1.4-CA5)', () => {
+    expect(describirFechaDespegue('2026-11-15', '2026-11-16')).toBe('Despegó el 15/11/2026');
+  });
+
+  it('devuelve «Despegó el DD/MM/AAAA» para una fecha del año anterior (HU-1.4-CA5)', () => {
+    expect(describirFechaDespegue('2025-12-31', '2026-01-01')).toBe('Despegó el 31/12/2025');
+  });
+
+  it('devuelve «DD/MM/AAAA» para una fecha futura más allá de mañana', () => {
+    expect(describirFechaDespegue('2026-12-10', '2026-11-16')).toBe('10/12/2026');
+  });
+
+  it('no confunde con «Mañana» el mismo día del mes siguiente', () => {
+    expect(describirFechaDespegue('2026-12-17', '2026-11-16')).toBe('17/12/2026');
+  });
+});
+
+describe('describirDuracion', () => {
+  it('devuelve «1 día» para 1 (HU-1.4-CA6)', () => {
+    expect(describirDuracion(1)).toBe('1 día');
+  });
+
+  it.each([
+    [5, '5 días'],
+    [2, '2 días'],
+    [30, '30 días'],
+  ])('devuelve «N días» para %d (HU-1.4-CA6)', (dias, texto) => {
+    expect(describirDuracion(dias)).toBe(texto);
   });
 });

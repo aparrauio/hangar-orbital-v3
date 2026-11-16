@@ -1,0 +1,53 @@
+/* Misiones de la Tarjeta de nave: DESIGN.md §6.7, bloque 7 (spec 04). */
+
+/* Botón secundario: DESIGN.md §6.3. Pendiente de pasarlo a formularios.css. */
+.boton--secundario {
+  color: var(--color-texto);
+  background: transparent;
+  border-color: var(--color-borde-control);
+}
+
+.misiones-nave {
+  display: grid;
+  gap: var(--espacio-2);
+  min-width: 0;
+}
+
+.misiones-texto {
+  margin: 0;
+  color: var(--color-texto-suave);
+  font-size: var(--texto-sm);
+}
+
+.misiones-lista {
+  display: grid;
+  gap: var(--espacio-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mision {
+  display: grid;
+  gap: var(--espacio-1);
+  min-width: 0;
+  padding: var(--espacio-2) var(--espacio-3);
+  background: var(--color-superficie-alta);
+  border-radius: var(--radio-sm);
+}
+
+.mision-destino {
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.mision-detalle {
+  color: var(--color-texto-suave);
+  font-size: var(--texto-sm);
+}
+
+.mision-fecha {
+  font-family: var(--fuente-cifras);
+  font-variant-numeric: tabular-nums;
+}
