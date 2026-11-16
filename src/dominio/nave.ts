@@ -18,10 +18,31 @@ export function validarNave(borrador: BorradorNave): ErroresNave {
 
   const { combustible } = borrador;
   if (combustible === null) {
-    errores.combustible = 'Indica el combustible de la nave.';
-  } else if (!Number.isInteger(combustible) || combustible < 0 || combustible > 100) {
-    errores.combustible = 'El combustible debe ser un número entero entre 0 y 100.';
+    errores.combustible = MENSAJE_COMBUSTIBLE_VACIO;
+  } else if (!esCombustibleValido(combustible)) {
+    errores.combustible = MENSAJE_COMBUSTIBLE_RANGO;
   }
 
   return errores;
+}
+
+// Mensajes compartidos por validarNave y validarCombustible (spec 06, decisión 1)
+export const MENSAJE_COMBUSTIBLE_VACIO = 'Indica el combustible de la nave.';
+export const MENSAJE_COMBUSTIBLE_RANGO = 'El combustible debe ser un número entero entre 0 y 100.';
+
+function esCombustibleValido(valor: number): boolean {
+  return Number.isInteger(valor) && valor >= 0 && valor <= 100;
+}
+
+export type ResultadoCombustible = { ok: true; valor: number } | { ok: false; error: string };
+
+// Valida lo que escribe el jefe al corregir el combustible (HU-2.2).
+// Solo acepta dígitos: así rechaza decimales con coma o punto, signos y notaciones como «1e2».
+export function validarCombustible(texto: string): ResultadoCombustible {
+  const limpio = texto.trim();
+  if (limpio === '') return { ok: false, error: MENSAJE_COMBUSTIBLE_VACIO };
+  if (!/^\d+$/.test(limpio)) return { ok: false, error: MENSAJE_COMBUSTIBLE_RANGO };
+  const valor = Number(limpio);
+  if (!esCombustibleValido(valor)) return { ok: false, error: MENSAJE_COMBUSTIBLE_RANGO };
+  return { ok: true, valor };
 }
