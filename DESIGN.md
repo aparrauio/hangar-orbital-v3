@@ -143,7 +143,7 @@ Contenedor de cada sección. Fondo `--color-superficie`, `--borde`, `--radio-md`
 | Variante | Aspecto | Uso |
 | --- | --- | --- |
 | Primario | Fondo `--color-acento`, texto `--color-sobre-acento`, peso 600 | Acción principal del panel: «Registrar nave», «Asignar misión» |
-| Secundario | Fondo transparente, borde `--color-borde-control`, texto `--color-texto` | Acciones de apoyo: «Ver misiones» / «Ocultar misiones» en la Tarjeta de nave (spec 04) |
+| Secundario | Fondo transparente, borde `--color-borde-control`, texto `--color-texto` | Acciones de apoyo en la Tarjeta de nave: «Registrar revisión» (spec 05) y «Ver misiones» / «Ocultar misiones» (spec 04) |
 
 - Alto mínimo 40 px, relleno horizontal `--espacio-4`, `--radio-sm`.
 - **Enviando:** el botón se deshabilita y baja su opacidad a 0.6, sin cambiar de ancho.
@@ -187,7 +187,12 @@ Orden fijo de arriba abajo:
 4. **Contador de misiones.**
 5. **Estado:** «Operativa» en texto suave, o la insignia «En reparación».
 6. **Motivos:** solo si la nave no es apta. Lista en `--texto-sm` con los textos de `MENSAJES_MOTIVO`.
-7. **Misiones** (spec 04): siempre presente, al final de la tarjeta.
+7. **Revisión** (spec 05): siempre presente.
+   - Un Botón secundario «Registrar revisión». Mientras envía, se deshabilita sin cambiar de texto ni de ancho (§6.3).
+   - Si la nave está en reparación, el botón aparece deshabilitado y debajo se muestra el motivo «La nave está en reparación: la revisión se registra al salir del dique seco.», en `--texto-sm` y `--color-texto-suave`, enlazado al botón con `aria-describedby`.
+   - Al terminar: Aviso de éxito (§6.8) «Revisión registrada.» y la tarjeta se actualiza (contador y aptitud). Si falla: Aviso de error «No se pudo registrar la revisión.».
+   - Reutiliza las clases existentes (`boton boton--secundario`, `tarjeta-estado`, `aviso`); no tiene hoja de estilos propia.
+8. **Misiones** (spec 04): siempre presente, al final de la tarjeta.
    - Un Botón secundario «Ver misiones», que pasa a «Ocultar misiones» con la lista abierta. Lleva `aria-expanded` y `aria-controls` apuntando a la lista.
    - Las misiones se cargan al abrir, no antes. Mientras cargan: «Cargando misiones…» en `--texto-sm` y `--color-texto-suave`.
    - Sin misiones: «Esta nave no tiene misiones.» con el mismo estilo que el texto de carga.
@@ -205,7 +210,7 @@ Fondo `--color-superficie`, `--borde`, `--radio-md`, relleno `--espacio-4`, sepa
 | Éxito | Fondo `--color-apta-fondo`, borde `1px solid var(--color-apta)`, texto `--color-texto` | `role="status"` |
 | Error | Fondo `--color-no-apta-fondo`, borde `1px solid var(--color-no-apta)`, texto `--color-texto` | `role="alert"` |
 
-Aparecen debajo del botón del formulario que los produjo. En la Tarjeta de nave, el aviso de error de las misiones aparece debajo del botón «Ver misiones».
+Aparecen debajo del botón del formulario que los produjo. En la Tarjeta de nave, los avisos de la revisión aparecen debajo del botón «Registrar revisión», y el aviso de error de las misiones, debajo del botón «Ver misiones».
 
 ### 6.9 Estados de la flota
 

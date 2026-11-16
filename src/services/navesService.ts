@@ -66,4 +66,16 @@ async function crear(borrador: BorradorNave): Promise<ResultadoCrearNave> {
   return { ok: true, nave: aNave(data) };
 }
 
-export const navesService = { listar, crear };
+// Pone ultima_revision = now() en la base de datos (HU-2.1, R5). La función no devuelve
+// ninguna fila si la nave no existe o está en reparación.
+async function registrarRevision(naveId: string): Promise<Nave> {
+  const { data, error } = await supabase.rpc('registrar_revision', { p_nave_id: naveId });
+  if (error) throw new Error(error.message);
+  // La función devuelve `setof naves`: un arreglo con la fila actualizada, o vacío
+  const filas: unknown = data;
+  const fila = Array.isArray(filas) ? (filas[0] as FilaNave | undefined) : undefined;
+  if (!fila) throw new Error('No se pudo registrar la revisión de la nave.');
+  return aNave(fila);
+}
+
+export const navesService = { listar, crear, registrarRevision };
