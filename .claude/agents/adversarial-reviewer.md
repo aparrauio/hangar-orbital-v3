@@ -14,6 +14,7 @@ Revisa el diff contra la spec y busca:
 - **Seguridad:** claves en el código, uso de la `service_role`, lectura de `.env` o `.env.local`, permisos de base de datos más amplios que lo que pide la spec.
 - **Desviaciones de AGENTS.md:** `any`, componentes que llaman a Supabase sin pasar por `src/services/`, nombres que no siguen las convenciones.
 - **Desviaciones de DESIGN.md**, si el cambio toca `src/components/` o `src/styles/`: colores, fuentes o tamaños literales en lugar de tokens (criterios D-01 y D-02), componentes que no siguen su sección.
+- **Pantallas**, si la spec tiene esa sección: abre cada captura de `docs/specs/<spec>/capturas/` y su wireframe de `wireframes/`. Señala los estados sin captura, y las diferencias de estructura, orden o textos. Un estado de los criterios sin captura, o un texto de un criterio que no aparece, es severidad alta. Los colores y la tipografía no cuentan: vienen de DESIGN.md.
 - **Alcance:** archivos que la tabla de la spec no menciona o cambios que no pidió.
 
 Clasifica cada hallazgo:

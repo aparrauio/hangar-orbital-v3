@@ -212,11 +212,59 @@ Como jefe de hangar, quiero ver las misiones pendientes de cada nave, para saber
 - **Alcance PRD:** A2 (necesaria para gestionar las misiones asignadas).
 
 ### HU-1.5 · Completar una misión
-**Estado:** por refinar.
+**Estado:** refinada.
 
 Como jefe de hangar, quiero marcar una misión pendiente como completada, para dejar constancia de que la nave volvió y anotar el combustible que le queda.
 - **Alcance PRD:** A2 (marcar como completadas). **Reglas:** R4. La misión ya sumó al contador al asignarse (R3), así que completarla no lo cambia.
 - **Nota:** anotar el combustible restante al completar es obligatorio (R4), pero esa parte pertenece a E2. Las dos historias tienen que salir juntas.
+- **Depende de:** la lista de misiones de la nave (HU-1.4, [spec 04](../specs/04-ver-misiones-nave.md)) y la validación del combustible de HU-2.2 (`validarCombustible` en `src/dominio/nave.ts`).
+- **Reglas del PRD que aplican:** R1 (aptitud), R3 (el contador no cambia al completar) y R4 (el combustible restante reemplaza al de la nave).
+- **Decisiones del cliente:**
+  - Una misión está pendiente o completada, como dice el supuesto del PRD.
+  - Al completarla, el combustible restante es obligatorio y reemplaza el combustible de la nave (R4).
+  - Completar no cambia el contador de misiones (R3).
+  - La misión completada sigue en la lista de misiones de la nave, marcada como completada y sin ninguna acción.
+  - Se completa desde la lista de misiones de la nave (spec 04), una misión a la vez.
+  - Solo se puede completar una misión desde su día de despegue. Las misiones que despegan después de hoy no muestran la acción.
+  - No se puede deshacer. Para evitar errores, el jefe tiene que escribir el combustible restante y confirmar. Si se equivoca de combustible, lo arregla con «Corregir combustible» (HU-2.2).
+  - En la lista van primero las pendientes y después las completadas. Cada grupo se ordena por fecha de despegue, como en la spec 04.
+
+#### Criterios de aceptación
+1. **Lista con misiones pendientes y completadas**
+   - DADO una nave con una misión pendiente que despegó ayer, una pendiente que despega mañana y una completada,
+   - CUANDO abro sus misiones,
+   - ENTONCES veo primero las dos pendientes y después la completada. Cada una indica «Pendiente» o «Completada» escrito con palabras. Solo la que despegó ayer muestra el botón «Completar»; la de mañana y la completada no muestran ningún botón.
+2. **Pedir el combustible restante**
+   - DADO una misión pendiente cuya fecha de despegue es hoy o anterior,
+   - CUANDO pulso «Completar»,
+   - ENTONCES aparece, dentro de esa misión, un campo vacío «Combustible restante» con el botón «Confirmar» y el botón «Cancelar». El resto de misiones sigue sin cambios, y no puedo abrir el campo de otra misión hasta confirmar o cancelar. Si pulso «Cancelar», el campo desaparece y la misión sigue pendiente.
+3. **Error de validación**
+   - DADO que estoy completando una misión,
+   - CUANDO confirmo con el campo vacío o con solo espacios, o con -1, 101, 24,5 o «abc»,
+   - ENTONCES la misión sigue pendiente, el combustible de la nave no cambia y bajo el campo aparece «Indica el combustible de la nave.» si está vacío, o «El combustible debe ser un número entero entre 0 y 100.» en los demás casos. Lo que escribí sigue en el campo para corregirlo.
+4. **Guardando**
+   - DADO que confirmé un combustible restante válido,
+   - CUANDO la app todavía no ha terminado de guardar,
+   - ENTONCES el botón «Confirmar» se ve deshabilitado, conserva su texto y su ancho, y no puedo pulsarlo otra vez. Tampoco puedo editar el campo, y la misión sigue marcada como «Pendiente».
+5. **Misión completada (R3, R4)**
+   - DADO una nave con un 60 % de combustible, 2 misiones desde la última revisión y una misión pendiente que despegó ayer,
+   - CUANDO completo esa misión con un 10 % de combustible restante,
+   - ENTONCES el campo desaparece, la misión pasa al grupo de completadas con «Completada» escrito y sin ningún botón, la barra de la nave muestra 10 %, la nave aparece como «No apta» por combustible insuficiente y el contador sigue en «2 de 3». Todo eso se ve sin recargar la página.
+6. **Error de conexión**
+   - DADO que estoy completando una misión con un combustible restante válido,
+   - CUANDO confirmo y no se puede guardar,
+   - ENTONCES aparece el aviso de error «No se pudo completar la misión.» junto a esa misión, que sigue como «Pendiente». El combustible de la nave y el contador no cambian. El campo sigue abierto con el valor que escribí, y «Confirmar» vuelve a estar habilitado para reintentar.
+7. **Uso en el celular a 390 px**
+   - DADO que abro la app en una pantalla de 390 px de ancho,
+   - CUANDO completo una misión de principio a fin,
+   - ENTONCES la página no tiene scroll horizontal. El campo «Combustible restante», sus mensajes y los botones «Completar», «Confirmar» y «Cancelar» se ven completos, sin cortarse, y cada botón mide al menos 40 × 40 px. Al escribir en el campo, el celular muestra el teclado numérico.
+
+#### Casos borde sin cubrir
+- **Dos jefes completan la misma misión a la vez:** ¿la segunda confirmación se rechaza o reemplaza el combustible que anotó el primero?
+- **Lista desactualizada:** otro jefe completó la misión, o puso la nave en dique seco (R6), mientras yo tenía el campo abierto. ¿La app vuelve a comprobar que la misión sigue pendiente al confirmar?
+- **Choque con HU-1.9:** mostrar las misiones completadas en la lista ya es un historial mínimo, y el PRD tiene abierto si se conserva el historial. Hay que confirmar con el cliente que HU-1.9 solo trata de lo que vaya más allá de esta lista.
+- **Qué día es "hoy":** la regla de despegue depende del mismo reloj que sigue abierto en HU-1.3.
+- **Combustible restante mayor que el de salida:** la app lo acepta (por ejemplo, salió con 30 % y vuelve con 80 %), porque no hay ninguna regla que lo impida. Conviene confirmarlo con el cliente.
 
 ## Historias fuera de alcance
 Se dejan anotadas para no perderlas, pero no entran en el MVP.
