@@ -1,5 +1,7 @@
 # Wireframes · HU-1.5 · Completar una misión
 
+**Estado:** aprobados por el usuario el 2026-11-18, con las decisiones de abajo.
+
 Wireframes de baja fidelidad, en escala de grises, hechos a partir de los criterios de HU-1.5 en [docs/backlog/E1-flota-y-misiones.md](../../../backlog/E1-flota-y-misiones.md). No usan los colores ni las fuentes de `DESIGN.md`: solo su estructura y sus textos.
 
 **Datos de ejemplo:** hoy es el 18/11/2026. La nave es «Aurora»: carguera, 60 % de combustible, 2 de 3 misiones, operativa y apta. Tiene tres misiones:

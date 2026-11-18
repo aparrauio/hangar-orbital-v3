@@ -174,16 +174,9 @@ Lista: Por hacer
 **Normativo (manda el wireframe):**
 - La estructura y el orden de los bloques y de los elementos dentro de cada misión.
 - Los textos: «Completar», «Combustible restante», «Confirmar», «Cancelar», «Pendiente», «Completada» y «No se pudo completar la misión.».
-- Las decisiones 1 a 10 del `README.md` de los wireframes:
-  - el campo se abre dentro de la misión, en lugar del botón «Completar»;
-  - «Confirmar» es primario;
-  - los botones se apilan si no caben;
-  - el estado va en una insignia a la derecha del destino;
-  - al guardar se deshabilitan el campo y los dos botones;
-  - el aviso de error va debajo de los botones;
-  - no hay aviso de éxito.
+- Las decisiones 1 a 10 del `README.md` de los wireframes.
 
-**No normativo (manda DESIGN.md):** los colores, la tipografía, los tamaños, los radios y los espacios. Los grises de los wireframes no son tokens. Si el wireframe choca con algo, el comportamiento lo manda esta spec, el estilo DESIGN.md y la estructura el wireframe (AGENTS.md).
+**No normativo (manda DESIGN.md):** los colores, la tipografía, los tamaños, los radios y los espacios. Los grises de los wireframes no son tokens. Si chocan, se aplica la regla de AGENTS.md.
 
 **Antes del código, actualizar DESIGN.md:**
 - **§6.3 Botón:** «Completar» es secundario. «Confirmar», dentro de una misión, es la única excepción primaria de la Tarjeta de nave.
@@ -202,7 +195,7 @@ Archivo nuevo: `supabase/migraciones/004_completar_mision.sql`.
 - **Insertar solo pendientes:** se sustituye la política «anon puede insertar misiones» por otra con `with check (estado = 'pendiente')`. Así nadie puede crear una misión ya completada llamando a la API.
 - **Sin permisos de actualización en `misiones`:**
   - No se da `update` sobre `misiones` a `anon` ni se crea ninguna política de `update`. El estado solo cambia mediante la función, y así se cumple la decisión 6.
-  - Tampoco se amplían los permisos de `naves`: siguen los de las migraciones 002 y 003.
+  - Los permisos de `naves` no cambian.
 - **Función `completar_mision(p_mision_id uuid, p_combustible integer) returns setof naves`:**
   - **Permisos:** `security definer` y `set search_path = public`. Es necesario porque `anon` no puede actualizar `misiones`. Se ejecuta `revoke execute ... from public` y luego `grant execute ... to anon`.
   - **Pasos:**
@@ -211,9 +204,7 @@ Archivo nuevo: `supabase/migraciones/004_completar_mision.sql`.
     3. Ejecuta `update naves set combustible = p_combustible where id = <nave_id> returning *`.
   - **Atómica:** todo ocurre en una sola transacción, porque es una sola llamada.
   - **Sin otros cambios:** no toca `ultima_revision`, así que el trigger de la migración 003 no se dispara, ni ninguna otra columna.
-- **Pendientes heredados que esta spec no cierra:**
-  - Spec 05, pendiente 3 y Spec 06, pendiente 1: sin inicio de sesión, cualquiera con la clave pública puede llamar a la función, y ya podía corregir `combustible` directamente.
-  - Cuando haya usuarios, `grant execute` pasa a `authenticated`.
+- **No cierra** el pendiente 3 de la Spec 05 ni el 1 de la Spec 06: sin inicio de sesión, cualquiera con la clave pública puede llamar a la función. Cuando haya usuarios, `grant execute` pasa a `authenticated`.
 
 ### 3. Tipos y funciones puras
 - **`src/types/mision.ts`:**
@@ -256,10 +247,7 @@ Archivo nuevo: `supabase/migraciones/004_completar_mision.sql`.
     - se cierra el formulario.
 - **`src/components/TarjetaNave.tsx`:** recibe la prop `onCompletarMision` y se la pasa a `MisionesNave`.
 - **`src/components/ListaNaves.tsx`:** `completarMision(misionId, combustible)` llama a `misionesService.completar` y suma 1 a `recarga`, igual que `corregirCombustible`. Así se actualizan la barra, la aptitud y el contador.
-- **Estilos:**
-  - Solo se usan tokens de DESIGN.md.
-  - Las insignias nuevas van en `src/styles/tarjeta-nave.css`, y la disposición de la misión y el formulario en `src/styles/misiones.css`.
-  - No hay estilos en línea.
+- **Estilos:** solo tokens y sin estilos en línea. Las insignias nuevas van en `tarjeta-nave.css`; la misión y el formulario, en `misiones.css`.
 
 ### 6. Criterios de aceptación
 - **HU-1.5-CA1:** con una misión pendiente que despegó ayer, una pendiente que despega mañana y una completada, la lista DEBE mostrar primero las dos pendientes y después la completada. Cada una DEBE mostrar «Pendiente» o «Completada», y solo la de ayer DEBE tener «Completar».
