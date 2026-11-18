@@ -1,4 +1,4 @@
-import type { BorradorMision, ErroresMision, Mision } from '../types/mision';
+import type { BorradorMision, ErroresMision, EstadoMision, Mision } from '../types/mision';
 
 // `hoy` llega como YYYY-MM-DD; en ese formato las fechas se comparan bien como texto.
 // Devuelve {} si los datos son válidos. La aptitud de la nave la comprueba puedeRecibirMision.
@@ -29,9 +29,11 @@ export function validarMision(borrador: BorradorMision, hoy: string): ErroresMis
   return errores;
 }
 
-// Devuelve un arreglo nuevo: por fecha de despegue y, si coincide, por orden de asignación.
+// Devuelve un arreglo nuevo: primero las pendientes y después las completadas (spec 07, decisión 7);
+// dentro de cada grupo, por fecha de despegue y, si coincide, por orden de asignación.
 export function ordenarMisiones(misiones: Mision[]): Mision[] {
   return [...misiones].sort((a, b) => {
+    if (a.estado !== b.estado) return a.estado === 'pendiente' ? -1 : 1;
     if (a.fechaDespegue !== b.fechaDespegue) return a.fechaDespegue < b.fechaDespegue ? -1 : 1;
     return Date.parse(a.createdAt) - Date.parse(b.createdAt);
   });
@@ -58,4 +60,22 @@ export function describirFechaDespegue(fecha: string, hoy: string): string {
 
 export function describirDuracion(dias: number): string {
   return dias === 1 ? '1 día' : `${dias} días`;
+}
+
+// Solo se completa una misión pendiente desde su día de despegue (spec 07, decisión 3).
+// La base de datos lo vuelve a comprobar en completar_mision.
+export function puedeCompletarMision(
+  mision: Pick<Mision, 'estado' | 'fechaDespegue'>,
+  hoy: string,
+): boolean {
+  return mision.estado === 'pendiente' && mision.fechaDespegue <= hoy;
+}
+
+const TEXTOS_ESTADO: Record<EstadoMision, string> = {
+  pendiente: 'Pendiente',
+  completada: 'Completada',
+};
+
+export function describirEstadoMision(estado: EstadoMision): string {
+  return TEXTOS_ESTADO[estado];
 }

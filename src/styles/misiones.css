@@ -51,3 +51,35 @@
   font-family: var(--fuente-cifras);
   font-variant-numeric: tabular-nums;
 }
+
+/* Destino a la izquierda e insignia de estado a la derecha (spec 07) */
+.mision-cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--espacio-2);
+  min-width: 0;
+}
+
+/* Formulario de completar, dentro de la misión (spec 07) */
+.completar-mision {
+  display: grid;
+  gap: var(--espacio-2);
+  min-width: 0;
+  margin-top: var(--espacio-1);
+}
+
+.completar-mision .campo-control {
+  background: var(--color-superficie);
+}
+
+/* En una fila si caben; si no, apilados */
+.completar-mision-botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+}
+
+.mision > .boton {
+  margin-top: var(--espacio-1);
+}

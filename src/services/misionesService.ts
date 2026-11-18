@@ -2,7 +2,13 @@ import { supabase } from '../lib/supabase';
 import { puedeRecibirMision } from '../dominio/aptitud';
 import { validarMision } from '../dominio/mision';
 import { aNave, COLUMNAS_NAVE, type FilaNave } from './navesService';
-import type { BorradorMision, ErroresMision, Mision, MotivoRechazo } from '../types/mision';
+import type {
+  BorradorMision,
+  ErroresMision,
+  EstadoMision,
+  Mision,
+  MotivoRechazo,
+} from '../types/mision';
 import type { Nave } from '../types/nave';
 
 interface FilaMision {
@@ -12,6 +18,7 @@ interface FilaMision {
   fecha_despegue: string;
   duracion_dias: number;
   created_at: string;
+  estado: EstadoMision;
 }
 
 export type ResultadoCrearMision =
@@ -19,7 +26,7 @@ export type ResultadoCrearMision =
   | { estado: 'datos_invalidos'; errores: ErroresMision }
   | { estado: 'nave_no_apta'; motivos: MotivoRechazo[] };
 
-const COLUMNAS_MISION = 'id, nave_id, destino, fecha_despegue, duracion_dias, created_at';
+const COLUMNAS_MISION = 'id, nave_id, destino, fecha_despegue, duracion_dias, created_at, estado';
 
 function aMision(fila: FilaMision): Mision {
   return {
@@ -29,6 +36,7 @@ function aMision(fila: FilaMision): Mision {
     fechaDespegue: fila.fecha_despegue,
     duracionDias: fila.duracion_dias,
     createdAt: fila.created_at,
+    estado: fila.estado,
   };
 }
 
@@ -87,4 +95,19 @@ async function listarPorNave(naveId: string): Promise<Mision[]> {
   return data.map(aMision);
 }
 
-export const misionesService = { contarDesdeRevision, crear, listarPorNave };
+// Marca la misión como completada y reemplaza el combustible de la nave en una sola operación
+// (HU-1.5, R4). La función no devuelve ninguna fila si no pudo completarla.
+async function completar(misionId: string, combustible: number): Promise<Nave> {
+  const { data, error } = await supabase.rpc('completar_mision', {
+    p_mision_id: misionId,
+    p_combustible: combustible,
+  });
+  if (error) throw new Error(error.message);
+  // La función devuelve `setof naves`: un arreglo con la nave actualizada, o vacío
+  const filas: unknown = data;
+  const fila = Array.isArray(filas) ? (filas[0] as FilaNave | undefined) : undefined;
+  if (!fila) throw new Error('No se pudo completar la misión.');
+  return aNave(fila);
+}
+
+export const misionesService = { completar, contarDesdeRevision, crear, listarPorNave };
