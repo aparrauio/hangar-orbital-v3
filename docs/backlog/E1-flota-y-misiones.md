@@ -212,11 +212,47 @@ Como jefe de hangar, quiero ver las misiones pendientes de cada nave, para saber
 - **Alcance PRD:** A2 (necesaria para gestionar las misiones asignadas).
 
 ### HU-1.5 · Completar una misión
-**Estado:** por refinar.
+**Estado:** refinada.
 
 Como jefe de hangar, quiero marcar una misión pendiente como completada, para dejar constancia de que la nave volvió y anotar el combustible que le queda.
-- **Alcance PRD:** A2 (marcar como completadas). **Reglas:** R4. La misión ya sumó al contador al asignarse (R3), así que completarla no lo cambia.
-- **Nota:** anotar el combustible restante al completar es obligatorio (R4), pero esa parte pertenece a E2. Las dos historias tienen que salir juntas.
+- **Alcance PRD:** A2 (marcar como completadas). **Reglas:** R3 y R4. La misión ya sumó al contador al asignarse (R3), así que completarla no lo cambia.
+- **Nota:** anotar el combustible restante al completar es obligatorio (R4); por eso esta historia incluye la parte de E2 que le corresponde.
+- **Decisiones del cliente:**
+  - Una misión está pendiente o completada, como dice el supuesto del PRD.
+  - Al completarla, el combustible restante es obligatorio y reemplaza el combustible de la nave.
+  - La misión completada sigue en la lista de misiones de la nave, marcada como completada y sin ninguna acción.
+  - Se completa desde la lista de misiones de la nave (spec 04).
+  - Se completa una misión a la vez.
+
+#### Criterios de aceptación
+1. **Misiones pendientes y completadas**
+   - DADO que una nave tiene misiones pendientes y completadas,
+   - CUANDO abro sus misiones,
+   - ENTONCES cada misión pendiente ofrece la acción «Completar» y cada misión completada muestra el texto «Completada», sin ninguna acción.
+2. **Pedir el combustible restante**
+   - DADO que veo una misión pendiente,
+   - CUANDO elijo «Completar»,
+   - ENTONCES se me pide el combustible restante, con las opciones «Confirmar» y «Cancelar», y no puedo empezar a completar otra misión hasta confirmar o cancelar.
+3. **Combustible obligatorio y válido (R4)**
+   - DADO que estoy completando una misión,
+   - CUANDO confirmo con el combustible vacío, solo con espacios, con decimales, negativo o mayor que 100,
+   - ENTONCES la misión no se completa y veo «Indica el combustible de la nave.» si está vacío, o «El combustible debe ser un número entero entre 0 y 100.» en los demás casos.
+4. **Guardando**
+   - DADO que confirmé un combustible válido,
+   - CUANDO la respuesta todavía no llega,
+   - ENTONCES veo «Guardando…» y no puedo volver a confirmar.
+5. **Misión completada (R3, R4)**
+   - DADO que una nave al 60 % tiene una misión pendiente y 1 misión desde su última revisión,
+   - CUANDO la completo con 40 % de combustible,
+   - ENTONCES veo «Misión completada.», la misión muestra «Completada», la nave queda al 40 % con su aptitud recalculada y el contador sigue en «1 de 3».
+6. **Error de conexión**
+   - DADO que estoy completando una misión,
+   - CUANDO falla la conexión al confirmar,
+   - ENTONCES veo «No se pudo completar la misión.», la misión sigue pendiente y conservo el combustible que escribí.
+7. **En el celular**
+   - DADO que uso la app en una pantalla de 390 px de ancho,
+   - CUANDO completo una misión,
+   - ENTONCES puedo hacerlo todo sin desplazarme en horizontal.
 
 ## Historias fuera de alcance
 Se dejan anotadas para no perderlas, pero no entran en el MVP.

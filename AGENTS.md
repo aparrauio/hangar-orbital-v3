@@ -37,6 +37,7 @@ App web para registrar las naves de un hangar, asignarles misiones y saber cuál
 - Ninguna funcionalidad se implementa sin una spec en `docs/specs/`.
 - Ejecutar `npm test` y `npm run build` antes de dar una tarea por terminada.
 - Para cualquier tarea visual, lee DESIGN.md antes de escribir código: ahí están los tokens, los componentes y las reglas de estilo.
+- Si una spec tiene la sección «Pantallas», su estructura la deciden los wireframes de `docs/specs/<número>-<slug>/wireframes/`. Si chocan: el comportamiento lo manda la spec, el estilo DESIGN.md y la estructura el wireframe.
 
 ## Reglas de proceso
 - Cada spec se implementa en su propia rama `spec/<número>-<slug>`, creada desde `main`. Nunca se commitea directo en `main`.

@@ -143,13 +143,85 @@ Archivo nuevo: `supabase/migraciones/003_corregir_combustible.sql`. Permiso para
 ### Pendientes
 (La implementación anota aquí lo que encuentre fuera de alcance.)
 
-## HU-1.5 · Completar una misión
-Lista: Backlog
+## Spec 07 · Completar una misión
+Lista: Por hacer
 
-Como jefe de hangar, quiero marcar una misión como completada y anotar el combustible que le queda a la nave, para dejar constancia de que volvió.
+**Historia:** HU-1.5 · Como jefe de hangar, quiero marcar una misión pendiente como completada, para dejar constancia de que la nave volvió y anotar el combustible que le queda.
+**Épica:** E1 · Flota y misiones (con la parte de E2 que exige R4). **Reglas:** R3 y R4. **Tickets:** T-22 a T-24.
+**Criterios:** HU-1.5-CA1 a CA7, en `docs/backlog/E1-flota-y-misiones.md`.
 
-- **Reglas:** R3 (completar no cambia el contador) y R4 (el combustible es obligatorio al completar).
-- **Falta antes de la spec:** decidir con el cliente cómo se guarda el estado de una misión (hoy no existe) y si una misión completada sigue apareciendo en «Ver misiones».
+### 0. Decisiones de esta spec
+1. **Una misión es `pendiente` o `completada`** (supuesto del PRD). Las misiones que ya existen quedan como pendientes.
+2. **Completar es una sola operación en la base de datos:** marca la misión como completada y reemplaza el combustible de la nave (R4). Si una de las dos partes falla, no cambia nada.
+3. **Completar no cambia el contador** (R3): el contador sigue contando las misiones creadas después de la última revisión, estén pendientes o completadas.
+4. **Una misión completada no vuelve a pendiente.**
+
+### 1. Pantallas
+Wireframes aprobados en `docs/specs/07-completar-mision/wireframes/` (ver su `README.md`).
+
+| Estado | Wireframes | Criterios |
+| --- | --- | --- |
+| Lista de misiones | `lista-movil.svg`, `lista-escritorio.svg` | CA1, CA7 |
+| Formulario abierto | `formulario-movil.svg`, `formulario-escritorio.svg` | CA2, CA7 |
+| Error de validación | `error-validacion-movil.svg` | CA3 |
+| Guardando | `guardando-movil.svg` | CA4 |
+| Misión completada | `exito-movil.svg` | CA5 |
+| Error de conexión | `error-conexion-movil.svg` | CA6 |
+
+- **Normativo:** la estructura, el orden de los elementos y los textos de los wireframes, y las nueve decisiones de su `README.md`.
+- **No normativo:** colores, tipografía y espacios. Vienen de `DESIGN.md`.
+- Antes del código se actualiza `DESIGN.md`: §6.3 (el botón primario «Confirmar» dentro de la Tarjeta de nave) y §6.7, bloque 9 (completar una misión).
+
+### 2. Base de datos
+Archivo nuevo: `supabase/migraciones/004_completar_mision.sql`.
+- Columna `estado` en `misiones`: texto, no nulo, por defecto `'pendiente'`, con `check (estado in ('pendiente', 'completada'))`.
+- Función `completar_mision(p_mision_id uuid, p_combustible integer)`, con `security invoker`: marca la misión como completada solo si está pendiente, reemplaza el combustible de su nave y devuelve la nave actualizada. Si la misión no existe o ya estaba completada, lanza un error.
+- Permiso para `anon`: `update` solo sobre la columna `estado` de `misiones`, con una política que solo permite pasar de `pendiente` a `completada` (`using (estado = 'pendiente') with check (estado = 'completada')`), y `execute` sobre la función. El combustible ya se puede actualizar desde la migración 003.
+
+### 3. Tipos y funciones puras
+- `src/types/mision.ts`: `Mision` gana `estado: EstadoMision`, con `type EstadoMision = 'pendiente' | 'completada'`.
+- `src/dominio/mision.ts`: `puedeCompletar(mision: Pick<Mision, 'estado'>): boolean`.
+- El combustible se valida con `validarCombustible` de `src/dominio/nave.ts` (spec 06), sin duplicar sus mensajes.
+
+### 4. Servicios
+- `src/services/misionesService.ts`: `COLUMNAS_MISION` incluye `estado`, y `aMision` lo lee. Nueva función `completar(misionId: string, combustible: number): Promise<Nave>`, que llama a `completar_mision` con `rpc` y devuelve la nave con `aNave`. Lanza un `Error` si Supabase falla.
+
+### 5. Componentes
+- `src/components/MisionesNave.tsx`: muestra cada misión según los wireframes. Usa `validarCombustible` al confirmar y no llama a `completar` si hay error. Avisa a la tarjeta con la nave actualizada para que cambien la barra de combustible y la aptitud.
+- `src/components/TarjetaNave.tsx` y `src/components/ListaNaves.tsx`: reciben la nave actualizada, igual que con la revisión y el combustible (specs 05 y 06).
+- `.boton--secundario` se pasa de `misiones.css` a `formularios.css` (pendiente de la spec 04).
+
+### 6. Criterios de aceptación
+HU-1.5-CA1 a CA7, tal como están en el backlog. La interfaz DEBE seguir la estructura de los wireframes y NO DEBE cambiar el contador al completar.
+
+### 7. Verificación
+| Criterio | Cómo |
+| --- | --- |
+| CA3 | Vitest: `validarCombustible` ya cubre los casos (spec 06); test nuevo de `puedeCompletar` |
+| CA1 a CA7 | Capturas comparadas con los wireframes, más prueba en el navegador contra Supabase |
+
+**Antes de capturar:** con `npm run dev` corriendo, la primera nave de la flota debe tener al menos dos misiones pendientes. La captura «exito» completa una misión de verdad: por eso va al final.
+
+```bash
+npm run captura -- 07-completar-mision lista "clic:Ver misiones" "esperar:Completar"
+npm run captura -- 07-completar-mision formulario "clic:Ver misiones" "clic:Completar"
+npm run captura -- 07-completar-mision error-validacion --anchos 390 "clic:Ver misiones" "clic:Completar" "clic:Confirmar"
+npm run captura -- 07-completar-mision guardando --anchos 390 "clic:Ver misiones" "clic:Completar" "escribir:Combustible restante=40" "lento" "clic:Confirmar"
+npm run captura -- 07-completar-mision error-conexion --anchos 390 "clic:Ver misiones" "clic:Completar" "escribir:Combustible restante=40" "sin-red" "clic:Confirmar" "esperar:No se pudo completar la misión."
+npm run captura -- 07-completar-mision exito --anchos 390 "clic:Ver misiones" "clic:Completar" "escribir:Combustible restante=40" "clic:Confirmar" "esperar:Misión completada."
+```
+
+El frontend no tiene tests automáticos de componentes: la interfaz se verifica con estas capturas y en el navegador.
+
+### 8. Tickets y archivos
+| Ticket | Crea | Modifica |
+| --- | --- | --- |
+| T-22 · Estado de misión y completar | `supabase/migraciones/004_completar_mision.sql` | `src/types/mision.ts`, `src/dominio/mision.ts`, `src/dominio/mision.test.ts`, `src/services/misionesService.ts` |
+| T-23 · Completar desde la lista | — | `DESIGN.md` (§6.3 y §6.7), `src/components/MisionesNave.tsx`, `src/components/TarjetaNave.tsx`, `src/components/ListaNaves.tsx`, `src/styles/misiones.css`, `src/styles/formularios.css` |
+| T-24 · Capturas y verificación | `docs/specs/07-completar-mision/capturas/` | Esta spec (resultados) |
+
+### Pendientes
+(La implementación anota aquí lo que encuentre fuera de alcance.)
 
 ## HU-2.3 · Poner una nave en dique seco y sacarla
 Lista: Backlog
