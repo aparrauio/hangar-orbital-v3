@@ -17,6 +17,8 @@ interface Props {
   onRegistrarRevision: (naveId: string) => Promise<void>;
   // Corrige el combustible y vuelve a cargar la flota; lanza un Error si falla
   onCorregirCombustible: (naveId: string, combustible: number) => Promise<void>;
+  // Completa una misión y vuelve a cargar la flota; lanza un Error si falla
+  onCompletarMision: (misionId: string, combustible: number) => Promise<void>;
 }
 
 type AvisoRevision = 'exito' | 'error' | null;
@@ -28,6 +30,7 @@ export default function TarjetaNave({
   aptitud,
   onRegistrarRevision,
   onCorregirCombustible,
+  onCompletarMision,
 }: Props) {
   const idMotivoRevision = useId();
   const idCombustible = useId();
@@ -142,7 +145,7 @@ export default function TarjetaNave({
           </p>
         )}
       </form>
-      <MisionesNave naveId={nave.id} />
+      <MisionesNave naveId={nave.id} onCompletar={onCompletarMision} />
     </li>
   );
 }

@@ -87,6 +87,19 @@
   background: var(--color-reparacion-fondo);
 }
 
+/* Insignias de misión (spec 07): sin colores de aptitud */
+.insignia--pendiente {
+  color: var(--color-texto);
+  background: transparent;
+  border: 1px solid var(--color-borde-control);
+}
+
+.insignia--completada {
+  color: var(--color-texto-suave);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+}
+
 /* Barra de combustible */
 .combustible-fila {
   display: grid;

@@ -143,7 +143,9 @@ Contenedor de cada sección. Fondo `--color-superficie`, `--borde`, `--radio-md`
 | Variante | Aspecto | Uso |
 | --- | --- | --- |
 | Primario | Fondo `--color-acento`, texto `--color-sobre-acento`, peso 600 | Acción principal del panel: «Registrar nave», «Asignar misión» |
-| Secundario | Fondo transparente, borde `--color-borde-control`, texto `--color-texto` | Acciones de apoyo en la Tarjeta de nave: «Registrar revisión» (spec 05), «Guardar» del combustible (spec 06) y «Ver misiones» / «Ocultar misiones» (spec 04) |
+| Secundario | Fondo transparente, borde `--color-borde-control`, texto `--color-texto` | Acciones de apoyo en la Tarjeta de nave: «Registrar revisión» (spec 05), «Guardar» del combustible (spec 06), «Ver misiones» / «Ocultar misiones» (spec 04), y «Completar» y «Cancelar» de cada misión (spec 07) |
+
+En la Tarjeta de nave todos los botones son secundarios, salvo una excepción: «Confirmar», dentro de una misión, es primario, porque cierra el formulario de completar (spec 07).
 
 - Alto mínimo 40 px, relleno horizontal `--espacio-4`, `--radio-sm`.
 - **Enviando:** el botón se deshabilita y baja su opacidad a 0.6, sin cambiar de ancho.
@@ -159,6 +161,10 @@ Etiqueta corta con texto obligatorio. Fuente `--fuente-titulo`, `--texto-xs`, ma
 | `insignia--apta` | Apta | `--color-apta` | `--color-apta-fondo` |
 | `insignia--no-apta` | No apta | `--color-no-apta` | `--color-no-apta-fondo` |
 | `insignia--reparacion` | En reparación | `--color-reparacion` | `--color-reparacion-fondo` |
+| `insignia--pendiente` | Pendiente | `--color-texto` | Transparente, con borde `1px solid var(--color-borde-control)` |
+| `insignia--completada` | Completada | `--color-texto-suave` | `--color-superficie`, con borde `1px solid var(--color-borde)` |
+
+Las insignias de misión (spec 07) no usan los colores de aptitud: el estado de una misión no dice si la nave puede despegar.
 
 «Operativa» no lleva insignia: se muestra como texto en `--color-texto-suave`. Solo se destaca lo excepcional.
 
@@ -205,6 +211,14 @@ Orden fijo de arriba abajo:
    - Si falla la carga: Aviso de error (§6.8) con «No se pudieron cargar las misiones.». El resto de la tarjeta sigue igual.
    - Lista `ul`, un `li` por misión, separados con `gap` `--espacio-2` y sin viñetas. Cada misión: el destino en `--texto-sm` y peso 600; debajo, la fecha de despegue en `--fuente-cifras` («Hoy», «Mañana», «10/12/2026» o «Despegó el 15/11/2026») y la duración («5 días»), ambas en `--texto-sm` y `--color-texto-suave`.
    - Cada misión lleva fondo `--color-superficie-alta`, `--radio-sm` y relleno `--espacio-2` `--espacio-3`.
+   - **Orden** (spec 07): primero las pendientes y después las completadas; cada grupo, por fecha de despegue y por orden de asignación.
+   - **Estado** (spec 07): en la misma fila que el destino, a la derecha, la insignia `insignia--pendiente` o `insignia--completada` (§6.4).
+   - **Completar** (spec 07): debajo de la fecha y la duración, un Botón secundario «Completar», solo en las misiones pendientes cuya fecha de despegue es hoy o anterior. Las completadas no tienen ningún botón.
+     - Al pulsarlo, el botón se sustituye, dentro de la misma misión, por un Campo de formulario (§6.2) «Combustible restante» (tipo texto con `inputMode="numeric"`) y, debajo, «Confirmar» (Botón primario) y «Cancelar» (Botón secundario), en una fila si caben y apilados si no. Dentro de la misión, el fondo del campo es `--color-superficie`, para que se distinga del fondo de la misión.
+     - Mientras un campo está abierto, el botón «Completar» de las demás misiones aparece deshabilitado.
+     - Los errores de `validarCombustible` aparecen debajo del campo (§6.2).
+     - Mientras guarda, el campo, «Confirmar» y «Cancelar» se deshabilitan sin cambiar de texto ni de ancho (§6.3).
+     - Al terminar, no hay aviso de éxito: la misión pasa al grupo de completadas y la tarjeta se actualiza.
    - Estilos en `src/styles/misiones.css`.
 
 Fondo `--color-superficie`, `--borde`, `--radio-md`, relleno `--espacio-4`, separación interna `--espacio-3`. La flota es una lista (`ul` con un `li` por tarjeta).
@@ -216,7 +230,7 @@ Fondo `--color-superficie`, `--borde`, `--radio-md`, relleno `--espacio-4`, sepa
 | Éxito | Fondo `--color-apta-fondo`, borde `1px solid var(--color-apta)`, texto `--color-texto` | `role="status"` |
 | Error | Fondo `--color-no-apta-fondo`, borde `1px solid var(--color-no-apta)`, texto `--color-texto` | `role="alert"` |
 
-Aparecen debajo del botón del formulario que los produjo. En la Tarjeta de nave, los avisos de la revisión aparecen debajo del botón «Registrar revisión», el aviso de error del combustible debajo de su botón «Guardar», y el aviso de error de las misiones, debajo del botón «Ver misiones».
+Aparecen debajo del botón del formulario que los produjo. En la Tarjeta de nave, los avisos de la revisión aparecen debajo del botón «Registrar revisión», el aviso de error del combustible debajo de su botón «Guardar», y el aviso de error de las misiones, debajo del botón «Ver misiones». El aviso «No se pudo completar la misión.» aparece dentro de la misión, debajo de «Confirmar» y «Cancelar» (spec 07).
 
 ### 6.9 Estados de la flota
 

@@ -33,6 +33,12 @@ export default function ListaNaves({ version }: Props) {
     setRecarga((r) => r + 1);
   }
 
+  // Completar reemplaza el combustible (R4): se recarga la flota para ver la barra y la aptitud
+  async function completarMision(misionId: string, combustible: number) {
+    await misionesService.completar(misionId, combustible);
+    setRecarga((r) => r + 1);
+  }
+
   useEffect(() => {
     let cancelado = false;
 
@@ -80,6 +86,7 @@ export default function ListaNaves({ version }: Props) {
           aptitud={aptitud}
           onRegistrarRevision={registrarRevision}
           onCorregirCombustible={corregirCombustible}
+          onCompletarMision={completarMision}
         />
       ))}
     </ul>

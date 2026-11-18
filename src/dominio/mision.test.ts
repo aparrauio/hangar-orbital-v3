@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import {
   describirDuracion,
+  describirEstadoMision,
   describirFechaDespegue,
   ordenarMisiones,
+  puedeCompletarMision,
   validarMision,
 } from './mision';
-import type { BorradorMision, Mision } from '../types/mision';
+import type { BorradorMision, EstadoMision, Mision } from '../types/mision';
 
 const HOY = '2026-10-28';
 
@@ -77,7 +79,12 @@ describe('validarMision', () => {
   });
 });
 
-function mision(id: string, fechaDespegue: string, createdAt: string): Mision {
+function mision(
+  id: string,
+  fechaDespegue: string,
+  createdAt: string,
+  estado: EstadoMision = 'pendiente',
+): Mision {
   return {
     id,
     naveId: '6f1c2a3e-0000-4000-8000-000000000001',
@@ -85,6 +92,7 @@ function mision(id: string, fechaDespegue: string, createdAt: string): Mision {
     fechaDespegue,
     duracionDias: 3,
     createdAt,
+    estado,
   };
 }
 
@@ -120,6 +128,78 @@ describe('ordenarMisiones', () => {
 
   it('devuelve un arreglo vacío si no hay misiones', () => {
     expect(ordenarMisiones([])).toEqual([]);
+  });
+
+  it('pone las pendientes antes que las completadas, aunque despeguen después (HU-1.5-CA1)', () => {
+    const completada = mision('c', '2026-11-02', '2026-10-20T10:00:00Z', 'completada');
+    const manana = mision('e', '2026-11-19', '2026-11-10T10:00:00Z');
+    const ayer = mision('t', '2026-11-17', '2026-11-10T11:00:00Z');
+    expect(ordenarMisiones([completada, manana, ayer]).map((m) => m.id)).toEqual(['t', 'e', 'c']);
+  });
+
+  it('ordena cada grupo por fecha y, si empatan, por asignación (HU-1.5-CA1)', () => {
+    const misiones = [
+      mision('c2', '2026-11-17', '2026-11-01T10:00:00Z', 'completada'),
+      mision('p2', '2026-11-20', '2026-11-01T10:00:00Z'),
+      mision('c1', '2026-11-02', '2026-10-20T10:00:00Z', 'completada'),
+      mision('p1b', '2026-11-18', '2026-11-05T10:00:00Z'),
+      mision('p1a', '2026-11-18', '2026-11-01T10:00:00Z'),
+    ];
+    expect(ordenarMisiones(misiones).map((m) => m.id)).toEqual(['p1a', 'p1b', 'p2', 'c1', 'c2']);
+  });
+
+  it('no modifica el arreglo recibido al mezclar estados', () => {
+    const original = [
+      mision('c', '2026-11-02', '2026-10-20T10:00:00Z', 'completada'),
+      mision('p', '2026-11-19', '2026-11-10T10:00:00Z'),
+    ];
+    const copia = [...original];
+    ordenarMisiones(original);
+    expect(original).toEqual(copia);
+  });
+});
+
+describe('puedeCompletarMision', () => {
+  const HOY_COMPLETAR = '2026-11-18';
+
+  it('acepta una misión pendiente que despegó ayer (HU-1.5-CA1)', () => {
+    expect(
+      puedeCompletarMision({ estado: 'pendiente', fechaDespegue: '2026-11-17' }, HOY_COMPLETAR),
+    ).toBe(true);
+  });
+
+  it('acepta una misión pendiente que despega hoy', () => {
+    expect(
+      puedeCompletarMision({ estado: 'pendiente', fechaDespegue: HOY_COMPLETAR }, HOY_COMPLETAR),
+    ).toBe(true);
+  });
+
+  it('rechaza una misión pendiente que despega mañana (HU-1.5-CA1)', () => {
+    expect(
+      puedeCompletarMision({ estado: 'pendiente', fechaDespegue: '2026-11-19' }, HOY_COMPLETAR),
+    ).toBe(false);
+  });
+
+  it('rechaza una misión completada aunque ya haya despegado (HU-1.5-CA1)', () => {
+    expect(
+      puedeCompletarMision({ estado: 'completada', fechaDespegue: '2026-11-17' }, HOY_COMPLETAR),
+    ).toBe(false);
+  });
+
+  it('compara bien entre meses y años', () => {
+    expect(
+      puedeCompletarMision({ estado: 'pendiente', fechaDespegue: '2025-12-31' }, '2026-01-01'),
+    ).toBe(true);
+    expect(
+      puedeCompletarMision({ estado: 'pendiente', fechaDespegue: '2027-01-01' }, '2026-12-31'),
+    ).toBe(false);
+  });
+});
+
+describe('describirEstadoMision', () => {
+  it('devuelve «Pendiente» y «Completada» (HU-1.5-CA1)', () => {
+    expect(describirEstadoMision('pendiente')).toBe('Pendiente');
+    expect(describirEstadoMision('completada')).toBe('Completada');
   });
 });
 
