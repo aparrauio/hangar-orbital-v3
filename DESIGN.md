@@ -143,7 +143,7 @@ Contenedor de cada sección. Fondo `--color-superficie`, `--borde`, `--radio-md`
 | Variante | Aspecto | Uso |
 | --- | --- | --- |
 | Primario | Fondo `--color-acento`, texto `--color-sobre-acento`, peso 600 | Acción principal del panel: «Registrar nave», «Asignar misión» |
-| Secundario | Fondo transparente, borde `--color-borde-control`, texto `--color-texto` | Acciones de apoyo en la Tarjeta de nave: «Registrar revisión» (spec 05) y «Ver misiones» / «Ocultar misiones» (spec 04) |
+| Secundario | Fondo transparente, borde `--color-borde-control`, texto `--color-texto` | Acciones de apoyo en la Tarjeta de nave: «Registrar revisión» (spec 05), «Guardar» del combustible (spec 06) y «Ver misiones» / «Ocultar misiones» (spec 04) |
 
 - Alto mínimo 40 px, relleno horizontal `--espacio-4`, `--radio-sm`.
 - **Enviando:** el botón se deshabilita y baja su opacidad a 0.6, sin cambiar de ancho.
@@ -192,7 +192,13 @@ Orden fijo de arriba abajo:
    - Si la nave está en reparación, el botón aparece deshabilitado y debajo se muestra el motivo «La nave está en reparación: la revisión se registra al salir del dique seco.», en `--texto-sm` y `--color-texto-suave`, enlazado al botón con `aria-describedby`.
    - Al terminar: Aviso de éxito (§6.8) «Revisión registrada.» y la tarjeta se actualiza (contador y aptitud). Si falla: Aviso de error «No se pudo registrar la revisión.».
    - Reutiliza las clases existentes (`boton boton--secundario`, `tarjeta-estado`, `aviso`); no tiene hoja de estilos propia.
-8. **Misiones** (spec 04): siempre presente, al final de la tarjeta.
+8. **Combustible** (spec 06): siempre presente, también con la nave en reparación.
+   - Un Campo de formulario (§6.2) con la etiqueta «Corregir combustible», de tipo texto con `inputMode="numeric"`, y a su lado o debajo un Botón secundario «Guardar».
+   - Los errores de `validarCombustible` aparecen debajo del campo, con borde `--color-no-apta`, `aria-invalid="true"` y `aria-describedby`.
+   - Al guardar, la barra de combustible y la aptitud se actualizan; no hay aviso de éxito.
+   - Si falla el guardado: Aviso de error (§6.8) «No se pudo corregir el combustible.» `[SUPUESTO]`.
+   - Reutiliza las clases existentes (`campo`, `campo-control`, `campo-error`, `boton boton--secundario`, `aviso`); no tiene hoja de estilos propia.
+9. **Misiones** (spec 04): siempre presente, al final de la tarjeta.
    - Un Botón secundario «Ver misiones», que pasa a «Ocultar misiones» con la lista abierta. Lleva `aria-expanded` y `aria-controls` apuntando a la lista.
    - Las misiones se cargan al abrir, no antes. Mientras cargan: «Cargando misiones…» en `--texto-sm` y `--color-texto-suave`.
    - Sin misiones: «Esta nave no tiene misiones.» con el mismo estilo que el texto de carga.
@@ -210,7 +216,7 @@ Fondo `--color-superficie`, `--borde`, `--radio-md`, relleno `--espacio-4`, sepa
 | Éxito | Fondo `--color-apta-fondo`, borde `1px solid var(--color-apta)`, texto `--color-texto` | `role="status"` |
 | Error | Fondo `--color-no-apta-fondo`, borde `1px solid var(--color-no-apta)`, texto `--color-texto` | `role="alert"` |
 
-Aparecen debajo del botón del formulario que los produjo. En la Tarjeta de nave, los avisos de la revisión aparecen debajo del botón «Registrar revisión», y el aviso de error de las misiones, debajo del botón «Ver misiones».
+Aparecen debajo del botón del formulario que los produjo. En la Tarjeta de nave, los avisos de la revisión aparecen debajo del botón «Registrar revisión», el aviso de error del combustible debajo de su botón «Guardar», y el aviso de error de las misiones, debajo del botón «Ver misiones».
 
 ### 6.9 Estados de la flota
 

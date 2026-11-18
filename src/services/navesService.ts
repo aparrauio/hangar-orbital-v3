@@ -78,4 +78,17 @@ async function registrarRevision(naveId: string): Promise<Nave> {
   return aNave(fila);
 }
 
-export const navesService = { listar, crear, registrarRevision };
+// Actualiza solo el combustible (HU-2.2). Se puede corregir aunque la nave esté en reparación.
+async function corregirCombustible(naveId: string, combustible: number): Promise<Nave> {
+  const { data, error } = await supabase
+    .from('naves')
+    .update({ combustible })
+    .eq('id', naveId)
+    .select(COLUMNAS_NAVE)
+    .single()
+    .overrideTypes<FilaNave, { merge: false }>();
+  if (error) throw new Error(error.message);
+  return aNave(data);
+}
+
+export const navesService = { listar, crear, registrarRevision, corregirCombustible };

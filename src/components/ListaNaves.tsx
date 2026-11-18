@@ -20,11 +20,16 @@ interface FilaFlota {
 export default function ListaNaves({ version }: Props) {
   const [filas, setFilas] = useState<FilaFlota[] | null>(null);
   const [error, setError] = useState(false);
-  // Cambia tras registrar una revisión, para recargar contador y aptitud
+  // Cambia tras registrar una revisión o corregir el combustible, para recargar la tarjeta
   const [recarga, setRecarga] = useState(0);
 
   async function registrarRevision(naveId: string) {
     await navesService.registrarRevision(naveId);
+    setRecarga((r) => r + 1);
+  }
+
+  async function corregirCombustible(naveId: string, combustible: number) {
+    await navesService.corregirCombustible(naveId, combustible);
     setRecarga((r) => r + 1);
   }
 
@@ -74,6 +79,7 @@ export default function ListaNaves({ version }: Props) {
           misiones={misiones}
           aptitud={aptitud}
           onRegistrarRevision={registrarRevision}
+          onCorregirCombustible={corregirCombustible}
         />
       ))}
     </ul>
